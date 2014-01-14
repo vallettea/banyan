@@ -34,16 +34,16 @@ object MyBuild extends Build {
 
         publishMavenStyle := true,
         pomIncludeRepository := { x => false },
-        publishArtifact in Test := false
-        // exportJars := true
+        publishArtifact in Test := false,
+        exportJars := true
         
     ) ++ SbtOneJar.oneJarSettings
 
   
 
     lazy val banyan = Project("banyan", file("."), settings = sharedSettings).settings(
-        // mainClass in (Compile, run) := Some("net.snips.banyan.examples.Cars"),
-        // mainClass in "one-jar" := Some("net.snips.banyan.examples.Cars")
+        mainClass in (Compile, run) := Some("net.snips.banyan.examples.Laposte"),
+        mainClass in "one-jar" := Some("net.snips.banyan.examples.Laposte")
         )
 
 }

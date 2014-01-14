@@ -45,6 +45,32 @@ case class Tree(
         leaves
     }
 
+    // // Return the feature importances
+    // def featureImportance:  = {
+    //     // gather all nodes
+    //     val nodesNotLeaves = new MutableArrayBuffer[Node]
+
+    //     def findNodesNotLeaves(current: Node): Unit = {
+    //         if (!current.isEmptyNode) {
+    //             if (!current.isLeaf) {
+    //                 nodesNotLeaves.append(current)
+    //                 findLeaves(current.getLeftChild)
+    //                 findLeaves(current.getRightChild)
+    //             }
+    //         }
+    //     }
+    //     findLeaves(root)
+
+    //     // compute importance
+    //     val importances = new MutableMap[Int, ]
+    //     nodesNotLeaves.foreach{ node => {
+    //         nLeft = 
+    //     }}
+
+        
+    // }
+
+
     def insertChildren(parent: Node,
                       leftChild: Node,
                       rightChild: Node,

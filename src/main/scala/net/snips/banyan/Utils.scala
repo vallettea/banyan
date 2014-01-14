@@ -13,6 +13,7 @@ object Utils {
         println("Loading data:")
         val lines = Source.fromFile(filename).getLines
         val headers: Map[Int, String] = lines.next.split(",").zipWithIndex.map(x => x._2 -> x._1).toMap
+        val featureNames = selectedFeatures.keys.toArray
 
         var possibleValues = headers.values.map(feature => feature -> MutableSet[Any]()).toMap
         var errors = 0
@@ -25,12 +26,12 @@ object Utils {
                 if(i % 100000 == 0) System.gc
                 
                 val ss = l.trim.split(",").zipWithIndex.map(x => headers(x._2) -> x._1.trim).toMap
-                val features = selectedFeatures.keys.toArray.map(k => new FeatureValue(ss(k)))
+                val features = featureNames.map(k => new FeatureValue(ss(k)))
                 val yValue = ss(toPredict).toDouble
-                selectedFeatures.keys.toArray.foreach{ feature => 
+                featureNames.foreach{ feature => 
                     possibleValues(feature) += ss(feature)
                 }
-                Some(new Point(features, yValue))
+                Some(Point(features, yValue))
             } match {
                 case Success(x) => x
                 case Failure(x) => errors += 1; None
