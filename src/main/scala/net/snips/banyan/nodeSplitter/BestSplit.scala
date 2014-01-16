@@ -30,6 +30,8 @@ case class BestSplit(
   
     def error: Double = leftError + rightError
 
+    def totCount: Int = leftCount + rightCount
+
     def isNotASolution: Boolean = {
         leftError + rightError == Double.PositiveInfinity
     }

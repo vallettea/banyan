@@ -9,9 +9,13 @@ import scala.collection.mutable.{ArrayBuffer => MutableArrayBuffer}
 // id: The id for the node
 // featureIndex: The index into the array of FeatureValue that this splits.
 // prediction: The prediction value, provided this is a leaf node.
-class OrderedNode(override val id: Int,
+class OrderedNode(
+    override val id: Int,
     override val featureIndex: Int,
-    prediction: Double) extends Node(prediction) {
+    prediction: Double,
+    error: Double,
+    totCount: Int
+) extends Node(prediction) {
 
     // Return the child leaf node corresponding to the array of values.
     // All features are assumed present. If not enough features are provided
@@ -33,6 +37,9 @@ class OrderedNode(override val id: Int,
     }
 
     override def splitString: String = splitValue.toString
+
+    override def nbSamples: Int = totCount
+    override def impurity: Double = error
 
     private var splitValue: FeatureValue = new FeatureValue(0)
 }

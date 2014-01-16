@@ -59,12 +59,6 @@ abstract class Node {
 
     def setPrediction(pred: Double): Unit = prediction = pred
 
-    // Generate a string of the leaves with the prediction and splitting value(s)
-    override def toString: String = { stringTraverse("") }
-
-    // Return the splitting value as a string.
-    def splitString: String = ""
-
 
     protected val id: Int = -1
     protected val featureIndex: Int = -1
@@ -72,13 +66,21 @@ abstract class Node {
     @BeanProperty protected var rightChild: Node = EmptyNode.getEmptyNode
     protected var prediction: Double = 0.0
 
+    // Return the splitting value as a string.
+    def splitString: String = ""
+
+    def nbSamples: Int = 0
+    def impurity: Double = 0.0
+
+    // Generate a string of the leaves with the prediction and splitting value(s)
+    override def toString: String = { stringTraverse("") }
 
     // A helper function used by toString.
-    private def stringTraverse(path: String): String = {
-        if (!leftChild.isEmptyNode && !rightChild.isEmptyNode) {
-            "%s :: %s".format(leftChild.stringTraverse(path + "L"), rightChild.stringTraverse(path + "R"))     
+    private def stringTraverse(path: String): String = {        
+        if (!isLeaf) {
+            "(%s) \n (%s)".format(leftChild.stringTraverse(path + "L"), rightChild.stringTraverse(path + "R"))  
         } else {
-            "%s = %f @ %s".format(path, prediction, splitString)
+            "%s: %s = %f @ %s\n".format(getId, path, prediction, splitString)
         }
     }
 

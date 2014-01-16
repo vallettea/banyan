@@ -28,19 +28,20 @@ case class ForestGrower(
 
         for (i <- 1 until maxTrees) {
 
-        if((100 * j / maxTrees.toFloat).toInt % 1 == 0) print((100 * j / maxTrees.toFloat).toInt + " %                 \r")
-        j += 1
-        val newTree = new Tree(1.0, maxNodesPerTree)
-        // TODO: Make the loss function selectable.
-        val lossFunction = new SquaredLoss
-        val differentialData = Utils.DifferentialData(trainingData, lossFunction, forest)
-        val treeGrower = new TreeGrower(newTree, featureTypes, differentialData)
-        treeGrower.grow()
-        forest.addTree(newTree)
+            if((100 * j / maxTrees.toFloat).toInt % 1 == 0) print((100 * j / maxTrees.toFloat).toInt + " %                 \r")
+            j += 1
+            val newTree = new Tree(1.0, maxNodesPerTree)
+            // TODO: Make the loss function selectable.
+            val lossFunction = new SquaredLoss
+            val differentialData = Utils.DifferentialData(trainingData, lossFunction, forest)
+            val treeGrower = new TreeGrower(newTree, featureTypes, differentialData)
+            treeGrower.grow()
 
-      }
-    forest
-  }
+            forest.addTree(newTree)
+
+        }
+        forest
+    }
   
     private def createInitialTree(featureTypes: Array[FeatureType],
         trainingData: Array[Point], forest: Forest): Unit = {

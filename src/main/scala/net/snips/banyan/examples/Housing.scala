@@ -1,6 +1,6 @@
 package net.snips.banyan.examples
 
-import net.snips.banyan.{Utils, ForestGrower}
+import net.snips.banyan.{Utils, ForestGrower, Tree, TreeGrower}
 import net.snips.banyan.dataContainers.{FeatureType, FeatureValue}
 import scala.collection.mutable.MutableList
 
@@ -35,23 +35,67 @@ object Housing extends App {
     val samplesLearn = data.take(cut)
     val samplesTest = data.takeRight(data.length - cut)
 
-    println("Start learning")
-    timer.start()
-    val forest = new ForestGrower(100, // MAXTREES 
-             5, //max node per tree
-             featureTypes,
-             samplesLearn).grow()
 
+    println("==========================")
+    println("Start learning with a tree")
+    timer.start()
+
+    val tree = new Tree(1.0, 500)
+    val treeGrower = new TreeGrower(tree, featureTypes, samplesLearn)
+    treeGrower.grow()
     println(s"Model fitted in ${timer.tick} ms")
+
+    
+    println("------- feature importance -------")
+    val names = selectedFeatures.keys.toArray
+    tree.featureImportance.toList.sortBy(_._2).reverse.foreach(f => 
+        println(f"${names(f._1)}%18s => ${f._2 * 100}%2.2f ")
+    )
+    println("----------------------------------")
+    println
 
     // check
     var expected = MutableList[Double]()
     var predicted = MutableList[Double]()
     samplesTest.foreach{ point => 
         expected += point.yValue
+        predicted +=  tree.getPrediction(point.features)
+        // println(s"${point.yValue}, ${forest.getPrediction(point.features)}")
+    }
+    
+    println("Pearson: " + Utils.pearson(expected.toArray, predicted.toArray).toString)
+    println("RSquared: " + Utils.RSquared(expected.toArray, predicted.toArray).toString)
+    println("Rmse: " + Utils.rmse(expected.toArray, predicted.toArray).toString)
+
+
+
+
+
+    println("==========================")
+    println("Start learning with a forest")
+    val forest = new ForestGrower(100, // MAXTREES 
+                    15, //max node per tree
+                    featureTypes,
+                    samplesLearn).grow()
+    println(s"Model fitted in ${timer.tick} ms")
+
+
+    println("------- feature importance -------")
+    forest.featureImportance.toList.sortBy(_._2).reverse.foreach(f => 
+        println(f"${names(f._1)}%18s => ${f._2 * 100}%2.2f ")
+    )
+    println("----------------------------------")
+    println
+
+    // check
+    expected.clear
+    predicted.clear
+    samplesTest.foreach{ point => 
+        expected += point.yValue
         predicted +=  forest.getPrediction(point.features)
         // println(s"${point.yValue}, ${forest.getPrediction(point.features)}")
     }
+    
     println("Pearson: " + Utils.pearson(expected.toArray, predicted.toArray).toString)
     println("RSquared: " + Utils.RSquared(expected.toArray, predicted.toArray).toString)
     println("Rmse: " + Utils.rmse(expected.toArray, predicted.toArray).toString)

@@ -8,7 +8,8 @@ import net.snips.banyan.dataContainers.FeatureValue
 class UnstructuredNode(
     prediction: Double,
     val parent: Node,
-    val error: Double) extends Node(prediction) {
+    val error: Double
+) extends Node(prediction) {
   
     override def getError: Double = error
 

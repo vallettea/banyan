@@ -29,10 +29,13 @@ case class TreeGrower(
 
         setRootNodeIfNecessary(trainingData)
 
-        val bestSplitForNode = new MutableHashMap[Node, BestSplit]
+        val bestSplitForNode = MutableHashMap[Node, BestSplit]()
         var done = false
+
         while (!tree.isFull && !done) {
+
             val nodesToInvestigate = findNodesToInvestigate()
+
             if (!nodesToInvestigate.isEmpty) {
                 trainingData.foreach{ point => {
                     val leaf = tree.getLeaf(point.features)
@@ -44,9 +47,11 @@ case class TreeGrower(
                 while (!nodesToInvestigate.isEmpty) {
                     val (node, nodeSplit) = nodesToInvestigate.head
                     bestSplitForNode.put(node, nodeSplit.findBestSplit())
+                    // println((node, nodeSplit.findBestSplit()))
                     nodesToInvestigate.remove(node)
                 }
             }
+
             if (bestSplitForNode.isEmpty) done = true
             else {
                 val (node, bestSplit) = bestSplitForNode.minBy(_._2)
@@ -56,21 +61,19 @@ case class TreeGrower(
                     bestSplitForNode.remove(node)
                 }
             }
+
         }
+
     }
   
   
     private def setRootNodeIfNecessary(trainingData: Array[Point]): Unit = {
         if (tree.size == 0) {
-            var yValSum: Double = 0
-            var numPoints: Int = 0
 
-            trainingData.foreach{ point => {
-                yValSum += point.yValue
-                numPoints += 1
-            }}
-
+            val yValSum = trainingData.map(point => point.yValue).reduce( _ + _)
+            val numPoints = trainingData.size
             val average = if (numPoints > 0) yValSum / numPoints else 0.0
+
             tree.setRootNode(new UnstructuredNode(average, EmptyNode.getEmptyNode, Double.PositiveInfinity))
         }
     }
@@ -79,11 +82,14 @@ case class TreeGrower(
     // be ignored in growing the tree.
     private def shouldIgnoreNode(node: Node): Boolean = node.getError == 0.0
 
+
     // Find nodes for which we have not yet determined a best split. If the tree
     // is empty, a map with an EmptyNode as a key is returned.
     private def findNodesToInvestigate(): MutableMap[Node, NodeSplit] = {
+
         val leaves: MutableArrayBuffer[Node] = tree.getLeaves
         if (leaves.isEmpty) leaves.append(EmptyNode.getEmptyNode)
+
         val nodesToInvestigate = new MutableHashMap[Node, NodeSplit]
         for (node <- leaves) {
             if (!bestSplitForNode.contains(node) && !shouldIgnoreNode(node))
@@ -102,26 +108,35 @@ case class TreeGrower(
     //       Node.
     // bestSplit: The data for splitting the node.
     private def replaceNode(node: Node, bestSplit: BestSplit): Node = {
-        var newNode: Node = null
+
         if (node.isEmptyNode) {
-            newNode = new UnstructuredNode(bestSplit.leftPrediction, node, bestSplit.error)
+            val newNode = new UnstructuredNode(bestSplit.leftPrediction, node, bestSplit.error)
             tree.setRootNode(newNode)
+            newNode
         } else {
-            if (featureTypes(bestSplit.featureIndex).isOrdered) {
-                newNode = new OrderedNode(nextId,
-                bestSplit.featureIndex,
-                node.getNodePrediction)
-            } else {
-                newNode = new CategoricalNode(nextId,
-                bestSplit.featureIndex,
-                node.getNodePrediction)
+            val newNode = {
+                if (featureTypes(bestSplit.featureIndex).isOrdered) {
+                    new OrderedNode(nextId,
+                        bestSplit.featureIndex,
+                        node.getNodePrediction,
+                        bestSplit.error,
+                        bestSplit.totCount
+                    )
+                } else {
+                    new CategoricalNode(nextId,
+                        bestSplit.featureIndex,
+                        node.getNodePrediction,
+                        bestSplit.error,
+                        bestSplit.totCount
+                    )
+                }
             }
-          nextId += 1
-          if (tree.size == 1) tree.replaceRootNode(newNode)
-          else node.replaceNode(newNode)
-          newNode
+            nextId += 1
+            if (tree.size == 1) tree.replaceRootNode(newNode)
+            else node.replaceNode(newNode)
+            newNode
         }
-        newNode
+
     } 
   
     // Increase the size of the tree by two, by growing a left and
@@ -133,7 +148,7 @@ case class TreeGrower(
         val parent = replaceNode(node, bestSplit)
         // If node is an EmptyNode, we have no children to insert.
         if (!node.isEmptyNode) {
-            val leftChild = new UnstructuredNode(bestSplit.leftPrediction, parent,bestSplit.leftError)
+            val leftChild = new UnstructuredNode(bestSplit.leftPrediction, parent, bestSplit.leftError)
             val rightChild = new UnstructuredNode(bestSplit.rightPrediction, parent, bestSplit.rightError)
             tree.insertChildren(parent, leftChild, rightChild, bestSplit.splitFeatures)
         }
