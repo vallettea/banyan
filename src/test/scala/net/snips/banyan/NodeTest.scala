@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 class NodeTest extends FlatSpec with Matchers {
 
     "Ordered Node - Root Only" should "behave normally" in {
-        val head = new OrderedNode(0, 0, 0.5)
+        val head = new OrderedNode(0, 0, 0.5, 0, 0)
 
         // Check the id assignments along with child getting
         head.getId should be (0)
@@ -29,8 +29,8 @@ class NodeTest extends FlatSpec with Matchers {
     // resulting function is a proxy for a CategoricalNode constructor.
     def makeNode(isOrdered: Boolean): (Int, Int, Double) => Node = {
         def makeNodeHelper(isOrdered: Boolean)(id: Int, featureIndex: Int, prediction: Double) = {
-            if (isOrdered) new OrderedNode(id, featureIndex, prediction)
-            else new CategoricalNode(id, featureIndex, prediction)
+            if (isOrdered) new OrderedNode(id, featureIndex, prediction, 0, 0)
+            else new CategoricalNode(id, featureIndex, prediction, 0, 0)
         }
         makeNodeHelper(isOrdered)
     }
